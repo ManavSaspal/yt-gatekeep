@@ -1,6 +1,7 @@
-// Throwaway: generates flat placeholder PNG icons (no deps, built-in zlib).
-// A near-white rounded square with a punched "keyhole" dot — reads in light &
-// dark toolbars. Replace icons/ with real art whenever. Run: node scripts/generate-icons.js
+// Generates the door icons (no deps, built-in zlib). A warm amber rounded tile
+// with a white door + knob — matches the 🚪 branding and stays visible on both
+// light and dark toolbars (the tile is its own background).
+// Run: node scripts/generate-icons.js
 const zlib = require('zlib');
 const fs = require('fs');
 const path = require('path');
@@ -25,26 +26,54 @@ function chunk(type, data) {
 function png(size) {
   const w = size, h = size;
   const raw = Buffer.alloc(h * (1 + w * 4)); // filter byte + RGBA per row
-  const r = size * 0.2; // corner radius
-  const cx = size * 0.5, cy = size * 0.38, hole = size * 0.13; // keyhole dot
-  const fg = [250, 250, 250];
+  const S = size;
+  const r = S * 0.22; // tile corner radius
+  const tile = [0xf5, 0x9e, 0x0b]; // warm amber
+  const door = [255, 255, 255];
+
+  // Door rectangle (fractions of size), with gently rounded top corners.
+  const dL = S * 0.34, dR = S * 0.66, dT = S * 0.24, dB = S * 0.80;
+  const topR = S * 0.14; // top-corner rounding
+  const knobX = S * 0.60, knobY = S * 0.54, knobR = Math.max(0.6, S * 0.045);
+
+  const tileMask = (x, y) => {
+    const dxl = x, dxr = w - 1 - x, dyt = y, dyb = h - 1 - y;
+    const nearL = dxl < r, nearR = dxr < r, nearT = dyt < r, nearB = dyb < r;
+    if ((nearL || nearR) && (nearT || nearB)) {
+      const ccx = nearL ? r : w - 1 - r;
+      const ccy = nearT ? r : h - 1 - r;
+      return Math.hypot(x - ccx, y - ccy) <= r;
+    }
+    return true;
+  };
+
+  const doorMask = (x, y) => {
+    if (x < dL || x > dR || y < dT || y > dB) return false;
+    // round only the two top corners
+    if (y < dT + topR) {
+      if (x < dL + topR) return Math.hypot(x - (dL + topR), y - (dT + topR)) <= topR;
+      if (x > dR - topR) return Math.hypot(x - (dR - topR), y - (dT + topR)) <= topR;
+    }
+    return true;
+  };
+
   for (let y = 0; y < h; y++) {
     raw[y * (1 + w * 4)] = 0; // filter: none
     for (let x = 0; x < w; x++) {
-      // rounded-square mask
-      let inside = true;
-      const dxl = x, dxr = w - 1 - x, dyt = y, dyb = h - 1 - y;
-      const nearL = dxl < r, nearR = dxr < r, nearT = dyt < r, nearB = dyb < r;
-      if ((nearL || nearR) && (nearT || nearB)) {
-        const ccx = nearL ? r : w - 1 - r;
-        const ccy = nearT ? r : h - 1 - r;
-        inside = Math.hypot(x - ccx, y - ccy) <= r;
-      }
-      // punch the keyhole hole
-      const inHole = Math.hypot(x - cx, y - cy) <= hole;
-      const alpha = inside && !inHole ? 255 : 0;
       const o = y * (1 + w * 4) + 1 + x * 4;
-      raw[o] = fg[0]; raw[o + 1] = fg[1]; raw[o + 2] = fg[2]; raw[o + 3] = alpha;
+      let col = null;
+      if (tileMask(x, y)) {
+        col = tile;
+        if (doorMask(x, y)) {
+          // knob is punched back to the tile color inside the white door
+          col = Math.hypot(x - knobX, y - knobY) <= knobR ? tile : door;
+        }
+      }
+      if (col) {
+        raw[o] = col[0]; raw[o + 1] = col[1]; raw[o + 2] = col[2]; raw[o + 3] = 255;
+      } else {
+        raw[o + 3] = 0; // transparent outside the tile
+      }
     }
   }
   const ihdr = Buffer.alloc(13);
