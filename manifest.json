@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "YT Gatekeep",
+  "version": "1.0.0",
+  "description": "Makes YouTube usable for work: declared session goal, stripped discovery surfaces, per-video LLM judgment against your intent.",
+  "permissions": ["storage", "tabs", "webNavigation", "alarms", "idle"],
+  "host_permissions": ["*://*.youtube.com/*", "https://openrouter.ai/*"],
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "YT Gatekeep"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "run_at": "document_start",
+      "css": ["src/content/strip.css"],
+      "js": ["src/lib/constants.js", "src/content/strip-init.js"]
+    },
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "run_at": "document_idle",
+      "js": ["src/lib/constants.js", "src/lib/storage.js", "src/content/content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/content/page-probe.js"],
+      "matches": ["*://*.youtube.com/*"]
+    }
+  ]
+}

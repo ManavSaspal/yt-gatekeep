@@ -1,0 +1,89 @@
+/*
+ * Gatekeeper surface stripping — injected at document_start, always present.
+ * The <html data-gatekeeper> attribute (set synchronously by strip-init.js)
+ * decides how these rules apply. Modelled on DF Tube.
+ *
+ * States:
+ *   (no attribute) or ="wall"  -> whole app hidden; content.js draws the wall.
+ *   ="active"                  -> stripped view: search + results + player only.
+ *   ="off"                     -> stripping disabled (friend-key); show everything.
+ *
+ * Default (no attribute) hides the entire app so the async storage read in
+ * strip-init.js can never leak a flash of the homepage grid. Worst case is a
+ * brief blank, which is the whole point of PRD 5.1.
+ */
+
+/* ---- Default: hide the app until we know the state. Prevents homepage flash. ---- */
+html:not([data-gatekeeper]) ytd-app,
+html[data-gatekeeper="wall"] ytd-app {
+  visibility: hidden !important;
+}
+
+/* ==================================================================== */
+/* ACTIVE: stripped view. Hide every discovery surface.                 */
+/* ==================================================================== */
+
+/* Homepage feed grid. Scoped to the home browse page so channel-page grids
+   (kept, per spec) and search results survive. */
+html[data-gatekeeper="active"] ytd-browse[page-subtype="home"] {
+  display: none !important;
+}
+
+/* Sidebar related / watch-next */
+html[data-gatekeeper="active"] #related,
+html[data-gatekeeper="active"] ytd-watch-next-secondary-results-renderer {
+  display: none !important;
+}
+
+/* End screen cards + post-playback grid */
+html[data-gatekeeper="active"] .ytp-endscreen-content,
+html[data-gatekeeper="active"] .ytp-ce-element,
+html[data-gatekeeper="active"] .ytp-pause-overlay {
+  display: none !important;
+}
+
+/* Shorts: shelf on any page + the reel */
+html[data-gatekeeper="active"] ytd-reel-shelf-renderer,
+html[data-gatekeeper="active"] ytd-rich-shelf-renderer[is-shorts],
+html[data-gatekeeper="active"] ytd-guide-entry-renderer a[title="Shorts"],
+html[data-gatekeeper="active"] ytd-mini-guide-entry-renderer[aria-label="Shorts"] {
+  display: none !important;
+}
+
+/* Trending / Explore / Subscriptions feed / and their guide entries */
+html[data-gatekeeper="active"] ytd-browse[page-subtype="trending"],
+html[data-gatekeeper="active"] ytd-browse[page-subtype="subscriptions"],
+html[data-gatekeeper="active"] ytd-browse[page-subtype="explore"] {
+  display: none !important;
+}
+
+/* Chips / filter bar of recommendations on the home/results shell */
+html[data-gatekeeper="active"] #guide-content ytd-guide-section-renderer:nth-of-type(2),
+html[data-gatekeeper="active"] ytd-feed-filter-chip-bar-renderer {
+  display: none !important;
+}
+
+/* Notifications bell menu */
+html[data-gatekeeper="active"] ytd-notification-topbar-button-renderer {
+  display: none !important;
+}
+
+/* Comments — toggled off by adding data-gk-comments="hide" on <html> */
+html[data-gatekeeper="active"][data-gk-comments="hide"] ytd-comments,
+html[data-gatekeeper="active"][data-gk-comments="hide"] #comments {
+  display: none !important;
+}
+
+/* ==================================================================== */
+/* Gatekeeper-owned overlays (wall + interstitial) live in content.js;  */
+/* base styles here so they paint correctly even before JS wires them.  */
+/* ==================================================================== */
+#gk-wall,
+#gk-interstitial {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

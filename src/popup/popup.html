@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="tabs">
+      <button class="tab active" data-tab="session">Session</button>
+      <button class="tab" data-tab="log">Log</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- ===================== SESSION ===================== -->
+    <section id="tab-session" class="panel active">
+      <!-- No active session / expired: the create form -->
+      <div id="create-view">
+        <label class="lbl">What are you here to do?</label>
+        <input id="goal" type="text" placeholder="research X so I can produce Y" autocomplete="off" />
+        <div id="goal-error" class="error hidden"></div>
+
+        <div id="recent-wrap" class="recent hidden">
+          <label class="lbl">Reuse a recent goal</label>
+          <div id="recent-goals"></div>
+        </div>
+
+        <button id="start-btn" class="primary">Start goal session</button>
+
+        <div class="or-divider"><span>or</span></div>
+
+        <div id="leisure-section">
+          <label class="lbl">Leisure block <span class="hint">no goal · full YouTube · time-boxed</span></label>
+          <div id="leisure-durations" class="durations"></div>
+          <button id="start-leisure-btn" class="primary alt">Start leisure block</button>
+          <div id="leisure-note" class="fine"></div>
+        </div>
+      </div>
+
+      <!-- Active session: the live view -->
+      <div id="active-view" class="hidden">
+        <div class="clock-wrap">
+          <div id="clock-label" class="clock-label">Active time on YouTube</div>
+          <div id="clock" class="clock">0:00</div>
+          <div id="clock-state" class="clock-state">on youtube</div>
+        </div>
+        <div id="goal-block">
+          <div class="active-goal-label">Goal</div>
+          <div id="active-goal" class="active-goal"></div>
+          <div id="goal-reason" class="goal-reason"></div>
+        </div>
+        <div id="leisure-block" class="hidden">
+          <div class="active-goal leisure-badge">🎬 Leisure block — no goal, full YouTube</div>
+        </div>
+
+        <button id="end-btn" class="primary">End session</button>
+        <div class="row" id="goal-actions">
+          <button id="change-goal-btn" class="ghost">Change goal 🔒</button>
+        </div>
+        <p id="active-fine" class="fine">Ending is always free. Changing the goal needs the friend key.</p>
+      </div>
+    </section>
+
+    <!-- ===================== LOG ===================== -->
+    <section id="tab-log" class="panel">
+      <div id="log-count" class="log-count"></div>
+      <div id="log-list" class="log-list"></div>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section id="tab-settings" class="panel">
+      <div id="settings-locked" class="locked-view hidden">
+        <div class="locked-icon">🔒</div>
+        <div class="locked-title">Settings are locked</div>
+        <p class="fine">Settings open only with the friend key — so a mid-session you can't quietly undo your own guardrails.</p>
+        <button id="settings-unlock-btn" class="primary">Unlock with friend key</button>
+      </div>
+      <div id="settings-content">
+      <label class="lbl">OpenRouter API key</label>
+      <input id="cfg-apikey" type="password" placeholder="sk-or-v1-..." autocomplete="off" />
+
+      <label class="lbl">Model <span class="hint">(OpenRouter slug — see openrouter.ai/models)</span></label>
+      <input id="cfg-model" type="text" placeholder="anthropic/claude-haiku-4.5" autocomplete="off" spellcheck="false" />
+
+      <label class="lbl">Work context <span class="hint">(a glossary for the judge — what you are building)</span></label>
+      <textarea id="cfg-context" rows="4" placeholder="e.g. Frameboard is an AI-orchestration canvas I'm building in Next.js + react-konva..."></textarea>
+
+      <label class="toggle">
+        <input id="cfg-comments" type="checkbox" />
+        <span>Hide comments</span>
+      </label>
+
+      <label class="toggle">
+        <input id="cfg-stripping-off" type="checkbox" />
+        <span>Disable surface stripping <span class="hint">🔒 friend key</span></span>
+      </label>
+
+      <label class="lbl">Leisure window <span class="hint">(when leisure blocks can be started)</span></label>
+      <div class="row time-row">
+        <input id="cfg-leisure-start" type="time" />
+        <span class="time-sep">to</span>
+        <input id="cfg-leisure-end" type="time" />
+      </div>
+
+      <label class="lbl">Friend key password <span class="hint">(leave blank to keep your current one)</span></label>
+      <input id="cfg-friendpw" type="password" placeholder="set / rotate friend password" autocomplete="off" />
+      <div id="friendpw-status" class="fine"></div>
+
+      <label class="lbl">Uninstall webhook URL <span class="hint">(notifies your friend on removal)</span></label>
+      <input id="cfg-webhook" type="url" placeholder="https://..." autocomplete="off" />
+
+      <div class="save-row">
+        <button id="save-settings">Save settings</button>
+        <button id="save-lock">Save &amp; lock 🔒</button>
+      </div>
+      <div id="settings-saved" class="fine"></div>
+      </div>
+    </section>
+
+    <!-- ===================== FRIEND-KEY MODAL ===================== -->
+    <div id="key-modal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-title">Friend key required</div>
+        <p id="key-modal-sub" class="fine"></p>
+        <input id="key-input" type="password" placeholder="Friend key" autocomplete="off" />
+        <div id="key-error" class="error hidden">Wrong key.</div>
+        <div class="row">
+          <button id="key-cancel" class="ghost">Cancel</button>
+          <button id="key-confirm" class="primary">Unlock</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../lib/constants.js"></script>
+    <script src="../lib/storage.js"></script>
+    <script src="../lib/auth.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
