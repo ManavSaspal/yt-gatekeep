@@ -1,6 +1,6 @@
 # 🚪 YT Gatekeep
 
-**YouTube, but it keeps you honest.** 💛
+**YouTube, with a gentle gatekeeper on your side.** 💛
 
 You open YouTube for *one* tutorial and resurface an hour later watching someone restore a rusty pan. YT Gatekeep gently catches that. You tell it what you came to do, it hides all the tempting rabbit-hole stuff, and it quietly checks each video against your goal — the good stuff plays, and the "wait, why am I watching this?" stuff gets a friendly stop sign.
 
