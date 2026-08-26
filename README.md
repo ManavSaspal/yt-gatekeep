@@ -77,6 +77,8 @@ Everything lives behind the 🚪 icon → **Settings**. Here's what each thing d
 
 **About that friend password 🔒** — once you set one, the *whole* Settings area locks behind it. That's on purpose: a focused, sober you sets things up, and a distracted, three-videos-deep you can't quietly undo them. Ending a session and starting a leisure block always stay free — the lock is only for loosening the guardrails.
 
+> 🌤️ **Ease in first (a day or two):** skip the friend password at the start and run it unlocked. Spend a couple of days tuning your **Work context** — start real sessions and watch what the judge lets through vs. stops. Nudge the wording until the right videos pass and the wrong ones get caught, the way *you* want. Once it feels dialed in, *then* set the password and lock it down. 🔒
+
 ## Switching AI providers
 
 The judge is just a standard AI chat call, so you can point it at any of three providers and flip between them in Settings anytime:
