@@ -20,7 +20,7 @@ It's free, it lives entirely in your browser, and it's on your side. 🌱
 
 ## What it does
 
-- 🎯 **Asks what you're here for.** Nothing loads until you type a goal, like *"learn Telugu"* or *"research canvas UIs."*
+- 🎯 **Asks what you're here for.** Nothing loads until you type a goal, like *"learn French"* or *"research canvas UIs."*
 - 🧹 **Clears the clutter.** No homepage feed, no sidebar, no Shorts, no endscreen — just a search bar and your video.
 - 🧠 **Keeps you pointed at your goal.** A little AI reads each video's title and description and asks *"does this actually help?"* On-topic videos just play. Off-topic ones get paused with a one-line reason.
 - 🧾 **Learns your world (once).** Add a **Work context** in Settings — a few lines on your projects, what you're learning, the tools you use — so the AI *gets* your goals instead of guessing. Once a friend password is set, it's locked behind it too. 🔒
