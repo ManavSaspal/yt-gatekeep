@@ -325,10 +325,71 @@
     if (ok) openSettingsTab();
   });
 
+  // ---- Judge provider (switchable, with per-provider keys/models) ----
+  let activeProvider = GK.DEFAULT_PROVIDER;
+  let providerState = {}; // { [id]: { apiKey, model } } — held while Settings is open
+
+  function renderProviderToggle() {
+    const wrap = $('provider-toggle');
+    wrap.innerHTML = '';
+    Object.keys(GK.PROVIDERS).forEach((id) => {
+      const p = GK.PROVIDERS[id];
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'prov' + (id === activeProvider ? ' active' : '');
+      b.textContent = p.label + (p.free ? ' · free' : '');
+      b.addEventListener('click', () => {
+        stashCurrentProvider();
+        activeProvider = id;
+        renderProviderToggle();
+        applyProviderToFields();
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  function applyProviderToFields() {
+    const p = GK.PROVIDERS[activeProvider];
+    const slot = providerState[activeProvider] || { apiKey: '', model: p.defaultModel };
+    $('cfg-apikey').value = slot.apiKey || '';
+    $('cfg-apikey').placeholder = p.keyHint;
+    $('apikey-label').textContent = `${p.label} API key`;
+    $('cfg-model').value = slot.model || p.defaultModel;
+    $('cfg-model').placeholder = p.defaultModel;
+    $('model-hint').textContent = p.modelHint ? `(${p.modelHint})` : '';
+    const link = $('provider-keylink');
+    if (p.keyUrl) {
+      link.href = p.keyUrl;
+      link.textContent = `Get a ${p.free ? 'free ' : ''}${p.label} key →`;
+      link.classList.remove('hidden');
+    } else {
+      link.classList.add('hidden');
+    }
+  }
+
+  function stashCurrentProvider() {
+    providerState[activeProvider] = {
+      apiKey: $('cfg-apikey').value.trim(),
+      model: $('cfg-model').value.trim() || GK.PROVIDERS[activeProvider].defaultModel,
+    };
+  }
+
   async function loadSettings() {
     const cfg = await GKStorage.getConfig();
-    $('cfg-apikey').value = cfg.apiKey || '';
-    $('cfg-model').value = cfg.model || GK.MODEL;
+    activeProvider = cfg.provider && GK.PROVIDERS[cfg.provider] ? cfg.provider : GK.DEFAULT_PROVIDER;
+    providerState = {};
+    Object.keys(GK.PROVIDERS).forEach((id) => {
+      const slot = (cfg.providers && cfg.providers[id]) || {};
+      let apiKey = slot.apiKey || '';
+      let model = slot.model || GK.PROVIDERS[id].defaultModel;
+      if (id === 'openrouter') {
+        if (!apiKey && cfg.apiKey) apiKey = cfg.apiKey; // legacy single-key migration
+        if (!slot.model && cfg.model) model = cfg.model;
+      }
+      providerState[id] = { apiKey, model };
+    });
+    renderProviderToggle();
+    applyProviderToFields();
     $('cfg-context').value = cfg.workContext || '';
     $('cfg-comments').checked = !!cfg.hideComments;
     $('cfg-stripping-off').checked = !!cfg.strippingOff;
@@ -358,9 +419,10 @@
       }
     }
 
+    stashCurrentProvider(); // fold the visible key/model into the active slot
     await GKStorage.patchConfig({
-      apiKey: $('cfg-apikey').value.trim(),
-      model: $('cfg-model').value.trim() || GK.MODEL,
+      provider: activeProvider,
+      providers: providerState,
       workContext: $('cfg-context').value.trim(),
       hideComments: $('cfg-comments').checked,
       strippingOff: wantStrippingOff,

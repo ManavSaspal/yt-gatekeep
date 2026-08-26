@@ -14,7 +14,7 @@ It defends against **drift**, not a single bad click. A blocklist can't tell a n
 Nothing on YouTube works until you declare what you're here to do. Type a goal (`research canvas interaction patterns for my app`), and YouTube unlocks — but stripped down to a search bar and a player. No feed, no sidebar, no endscreen.
 
 ### 🧠 Per-video LLM judgment
-Every watch page is judged after **12 seconds** of active viewing by a cheap model (default **Claude Haiku 4.5** via OpenRouter). The judge sees your goal, your work context, the video's metadata, and the **last 5 verdicts this session** — so it catches *drift*, not just individual off-topic videos.
+Every watch page is judged after **12 seconds** of active viewing. The judge sees your goal, your work context, the video's metadata, and the **last 5 verdicts this session** — so it catches *drift*, not just individual off-topic videos. Bring your own model: switch between **Gemini, OpenRouter, or Groq** in Settings (there's a free, no-credit-card option — see below).
 
 - ✅ **Allowed** → nothing happens. Silence is the reward.
 - 🛑 **Blocked** → the player is covered by an interstitial explaining why, with your goal and remaining time in view.
@@ -77,15 +77,25 @@ Works in any Chromium browser (Chrome, Brave, Edge, Arc).
 
 ---
 
-## 🔑 Get an OpenRouter API key
+## 🔑 Get an API key (pick a provider)
 
-The judge runs through [OpenRouter](https://openrouter.ai) (one key, many models, and it works from the browser).
+The judge is just an OpenAI-compatible chat call, so you can point it at any of three providers — switch between them in **Settings** to compare. In the popup, choose the provider, paste its key, and (optionally) set the model.
 
-1. Sign up at [openrouter.ai](https://openrouter.ai) (Google/GitHub login).
-2. Add a few dollars of credit under **Settings → Credits** (pay-as-you-go).
-3. **Settings → Keys → Create Key**, name it `gatekeeper`, and copy it (`sk-or-v1-…`). You can set a per-key spend limit here as a safety cap.
+### 🟢 Gemini — free, no credit card *(recommended to start)*
+Best judgment quality among the no-card free tiers, and the easiest setup.
+1. Go to [aistudio.google.com/apikey](https://aistudio.google.com/apikey) and sign in with a Google account.
+2. Click **Create API key** (no billing details required) and copy it (`AIza…`).
+3. In YT Gatekeep → Settings → provider **Gemini**, paste the key. Default model `gemini-2.5-flash`.
 
-> **Heads up:** a Claude/ChatGPT *subscription* does **not** include API access — that's a separate, metered product. OpenRouter billing is its own thing.
+### 🟢 Groq — free, no credit card
+Fast, open models (Llama etc.). Key from [console.groq.com/keys](https://console.groq.com/keys) (`gsk_…`). Default model `llama-3.3-70b-versatile`.
+
+### 🔵 OpenRouter — paid, one key for many models
+One key reaches Claude, GPT, Gemini, and more.
+1. Sign up at [openrouter.ai](https://openrouter.ai), add a few dollars under **Credits** (pay-as-you-go), set a per-key spend cap.
+2. **Keys → Create Key**, copy it (`sk-or-v1-…`). Default model `anthropic/claude-haiku-4.5`.
+
+> **Heads up:** a Claude/ChatGPT *subscription* does **not** include API access — that's a separate, metered product. Use Gemini/Groq for a genuinely free setup. (Free-tier rate limits change over time; check the provider's current limits.)
 
 ---
 
@@ -95,8 +105,9 @@ Open the popup → **Settings** (🔒 gated by the friend key once one is set):
 
 | Setting | What it does |
 |---|---|
-| **OpenRouter API key** | `sk-or-v1-…` — required for judging. |
-| **Model** | Any OpenRouter slug. Default `anthropic/claude-haiku-4.5`; verify at [openrouter.ai/models](https://openrouter.ai/models). |
+| **Judge provider** | Toggle **Gemini / OpenRouter / Groq**. Each keeps its own key + model, so you can switch back and forth to compare. |
+| **API key** | The key for the selected provider (required for judging). |
+| **Model** | The model slug for the selected provider (a sensible default is pre-filled). |
 | **Work context** | A glossary of what you're building, so the judge understands your goals. Not a permission list. |
 | **Hide comments** | On by default. |
 | **Disable surface stripping** 🔒 | Show full YouTube even in a goal session (friend key). |
@@ -119,25 +130,14 @@ Open the popup → **Settings** (🔒 gated by the friend key once one is set):
 
 ## 💸 Cost
 
-Roughly **~600 input + ~60 output tokens per video judged**. On Claude Haiku that's about **a tenth of a cent per check** — around **$3–5/month** at a couple hundred checks a day, usually less. No transcripts are sent (too slow, too costly, unnecessary): just title, channel, the first 300 chars of the description, and duration.
+Roughly **~600 input + ~60 output tokens per video judged**. On **Gemini or Groq's free tier that's $0**; on a paid provider it's about a tenth of a cent per check (~$3–5/month at a couple hundred checks a day, usually less). No transcripts are sent (too slow, too costly, unnecessary): just title, channel, the first 300 chars of the description, and duration.
 
 ---
 
 ## 🔐 Privacy & security
 
-- **Your API key lives in `chrome.storage.local`** and is sent directly to OpenRouter from the extension. This is acceptable **because it's a personal, single-user, load-unpacked extension on your own machine.** Don't publish a build with a key baked in, and don't share your Chrome profile. Set a per-key spend limit on OpenRouter.
-- **No analytics, no servers, no tracking.** Everything (sessions, logs, cache, settings) is local to your browser. The only outbound calls are to OpenRouter (to judge a video) and, if you configure one, your own uninstall webhook.
-
----
-
-## ⚠️ Known limitations
-
-Stated plainly so they're not a surprise:
-
-- The extension can be **disabled in two seconds** from `chrome://extensions`. Only the uninstall webhook (social cost) reaches that moment.
-- **Incognito** windows run without extensions by default.
-- **Safari, and phones**, exist and aren't covered.
-- The model will be **wrong in both directions** sometimes. The interstitial's override exists because of this — it's a feature, not a leak.
+- **Your API key lives in `chrome.storage.local`** and is sent directly to your chosen provider from the extension. This is acceptable **because it's a personal, single-user, load-unpacked extension on your own machine.** Don't publish a build with a key baked in, and don't share your Chrome profile. Set a per-key spend/rate limit where the provider allows it.
+- **No analytics, no servers, no tracking.** Everything (sessions, logs, cache, settings) is local to your browser. The only outbound calls are to your chosen judge provider (to judge a video) and, if you configure one, your own uninstall webhook.
 
 ---
 
@@ -148,7 +148,7 @@ Vanilla MV3 — no bundler, no framework, no build step.
 ```
 manifest.json            MV3 manifest
 src/
-  lib/                   constants · storage · judge (OpenRouter) · auth (friend key)
+  lib/                   constants · storage · judge (Gemini/OpenRouter/Groq) · auth (friend key)
   background/            service worker: time ledger, judgment, session lifecycle
   content/               strip.css + document_start injector, page logic, page-probe
   popup/                 the popup UI (Session · Log · Settings)

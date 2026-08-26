@@ -134,9 +134,11 @@ async function timeSnapshot() {
 // Validate a goal against the work context (LLM). Fails open.
 async function handleValidateGoal({ goal }) {
   const cfg = await GKStorage.getConfig();
+  const prov = await GKStorage.getResolvedProvider();
   return GKJudge.validateGoal({
-    apiKey: cfg.apiKey,
-    model: cfg.model,
+    url: prov.url,
+    apiKey: prov.apiKey,
+    model: prov.model,
     workContext: cfg.workContext,
     goal,
   });
@@ -228,9 +230,11 @@ async function judgeVideo({ video }) {
   }
 
   const cfg = await GKStorage.getConfig();
+  const prov = await GKStorage.getResolvedProvider();
   const result = await GKJudge.judge({
-    apiKey: cfg.apiKey,
-    model: cfg.model,
+    url: prov.url,
+    apiKey: prov.apiKey,
+    model: prov.model,
     workContext: cfg.workContext,
     goal: session.goal,
     video,

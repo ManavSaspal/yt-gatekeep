@@ -75,11 +75,15 @@
         <button id="settings-unlock-btn" class="primary">Unlock with friend key</button>
       </div>
       <div id="settings-content">
-      <label class="lbl">OpenRouter API key</label>
-      <input id="cfg-apikey" type="password" placeholder="sk-or-v1-..." autocomplete="off" />
+      <label class="lbl">Judge provider <span class="hint">switch anytime to compare quality</span></label>
+      <div id="provider-toggle" class="provider-toggle"></div>
+      <a id="provider-keylink" class="keylink hidden" target="_blank" rel="noopener"></a>
 
-      <label class="lbl">Model <span class="hint">(OpenRouter slug — see openrouter.ai/models)</span></label>
-      <input id="cfg-model" type="text" placeholder="anthropic/claude-haiku-4.5" autocomplete="off" spellcheck="false" />
+      <label class="lbl"><span id="apikey-label">API key</span></label>
+      <input id="cfg-apikey" type="password" placeholder="" autocomplete="off" />
+
+      <label class="lbl">Model <span class="hint" id="model-hint"></span></label>
+      <input id="cfg-model" type="text" placeholder="" autocomplete="off" spellcheck="false" />
 
       <label class="lbl">Work context <span class="hint">(a glossary for the judge — what you are building)</span></label>
       <textarea id="cfg-context" rows="4" placeholder="e.g. Frameboard is an AI-orchestration canvas I'm building in Next.js + react-konva..."></textarea>

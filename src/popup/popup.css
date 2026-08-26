@@ -170,6 +170,18 @@ button { cursor: pointer; font: inherit; }
 .toggle { display: flex; align-items: center; gap: 9px; margin: 16px 0 0; font-size: 13.5px; cursor: pointer; }
 .toggle input { width: 16px; height: 16px; accent-color: var(--fg); }
 
+/* Judge provider toggle */
+.provider-toggle { display: flex; gap: 6px; margin-bottom: 8px; }
+.provider-toggle .prov {
+  flex: 1; padding: 8px 6px; border-radius: 9px; font: inherit; font-size: 12px;
+  font-weight: 600; cursor: pointer; background: var(--card); color: var(--fg);
+  border: 1px solid var(--border-2); white-space: nowrap;
+}
+.provider-toggle .prov.active { background: var(--accent); color: #09090b; border-color: var(--accent); }
+.keylink { display: inline-block; font-size: 12px; color: var(--muted); margin-bottom: 12px; text-decoration: underline; }
+.keylink:hover { color: var(--fg); }
+.keylink.hidden { display: none; }
+
 /* Save buttons row */
 .save-row { display: flex; gap: 8px; margin-top: 18px; }
 .save-row button { flex: 1; padding: 11px; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }

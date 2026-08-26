@@ -5,11 +5,43 @@
 // No ESM export/import — content scripts are classic scripts and would fail to parse them.
 
 globalThis.GK = {
-  // --- Model (via OpenRouter — OpenAI-compatible, browser-callable) ---
-  // Default slug; override in Settings. Verify exact slug at openrouter.ai/models.
-  MODEL: 'anthropic/claude-haiku-4.5',
+  // --- Model / providers (all OpenAI-compatible, browser-callable) ---
+  MODEL: 'anthropic/claude-haiku-4.5', // fallback default (OpenRouter)
   OPENROUTER_URL: 'https://openrouter.ai/api/v1/chat/completions',
-  APP_TITLE: 'Gatekeeper', // sent as X-Title for OpenRouter's app ranking
+  APP_TITLE: 'Gatekeeper', // sent as X-Title to OpenRouter only
+
+  DEFAULT_PROVIDER: 'openrouter',
+  // Each provider exposes the same OpenAI chat-completions shape, so only the
+  // base URL, key, and model differ. Switchable in Settings to compare quality.
+  PROVIDERS: {
+    openrouter: {
+      label: 'OpenRouter',
+      url: 'https://openrouter.ai/api/v1/chat/completions',
+      keyHint: 'sk-or-v1-…',
+      keyUrl: 'https://openrouter.ai/keys',
+      defaultModel: 'anthropic/claude-haiku-4.5',
+      modelHint: 'see openrouter.ai/models',
+      free: false,
+    },
+    gemini: {
+      label: 'Gemini',
+      url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      keyHint: 'AIza… (free, no card)',
+      keyUrl: 'https://aistudio.google.com/apikey',
+      defaultModel: 'gemini-2.5-flash',
+      modelHint: 'e.g. gemini-2.5-flash / -flash-lite',
+      free: true,
+    },
+    groq: {
+      label: 'Groq',
+      url: 'https://api.groq.com/openai/v1/chat/completions',
+      keyHint: 'gsk_… (free, no card)',
+      keyUrl: 'https://console.groq.com/keys',
+      defaultModel: 'llama-3.3-70b-versatile',
+      modelHint: 'see console.groq.com/docs/models',
+      free: true,
+    },
+  },
 
   // --- Timing (ms) ---
   HEARTBEAT_INTERVAL_MS: 5000, // content flushes buffered active-ms this often

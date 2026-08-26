@@ -7,8 +7,14 @@
 
   const DEFAULTS = {
     config: {
-      apiKey: '', // OpenRouter key (sk-or-v1-...)
-      model: GK.MODEL, // OpenRouter model slug; editable in Settings
+      apiKey: '', // legacy single key (pre-provider builds); migrated to providers.openrouter
+      model: GK.MODEL, // legacy single model; migrated likewise
+      provider: GK.DEFAULT_PROVIDER, // 'openrouter' | 'gemini' | 'groq'
+      providers: {
+        openrouter: { apiKey: '', model: GK.PROVIDERS.openrouter.defaultModel },
+        gemini: { apiKey: '', model: GK.PROVIDERS.gemini.defaultModel },
+        groq: { apiKey: '', model: GK.PROVIDERS.groq.defaultModel },
+      },
       workContext: '',
       friendPasswordHash: '', // SHA-256 hex; friend sets it, user never sees it
       authMode: 'password', // "password" (shipped) | "signature" (stub)
@@ -72,6 +78,22 @@
 
   const getConfig = () => get('config');
   const patchConfig = (p) => patch('config', p);
+
+  // Resolve the active provider into { url, apiKey, model } for the API call.
+  // Handles legacy single-key configs by treating them as OpenRouter.
+  async function getResolvedProvider() {
+    const cfg = await getConfig();
+    const id = (cfg.provider && GK.PROVIDERS[cfg.provider]) ? cfg.provider : GK.DEFAULT_PROVIDER;
+    const preset = GK.PROVIDERS[id];
+    const slot = (cfg.providers && cfg.providers[id]) || {};
+    let apiKey = slot.apiKey || '';
+    let model = slot.model || preset.defaultModel;
+    if (id === 'openrouter') {
+      if (!apiKey && cfg.apiKey) apiKey = cfg.apiKey; // legacy top-level key
+      if (!slot.model && cfg.model) model = cfg.model;
+    }
+    return { id, label: preset.label, url: preset.url, apiKey, model };
+  }
   const getSession = () => get('session');
   const patchSession = (p) => patch('session', p);
   const setSession = (s) => set('session', s);
@@ -122,6 +144,7 @@
     patch,
     getConfig,
     patchConfig,
+    getResolvedProvider,
     getSession,
     patchSession,
     setSession,

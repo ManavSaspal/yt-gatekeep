@@ -15,6 +15,14 @@
     return `${videoId}:${hashGoal(goal)}`;
   }
 
+  // Build headers for an OpenAI-compatible endpoint. X-Title is OpenRouter-only:
+  // sending it to Gemini/Groq would fail CORS preflight and silently fail-open.
+  function apiHeaders(endpoint, apiKey) {
+    const h = { 'content-type': 'application/json', Authorization: `Bearer ${apiKey}` };
+    if (endpoint.includes('openrouter.ai')) h['X-Title'] = GK.APP_TITLE;
+    return h;
+  }
+
   const SYSTEM_PROMPT = (workContext) =>
     [
       'You are Gatekeeper, a focus filter for one user working on YouTube.',
@@ -88,21 +96,18 @@
   // Calls OpenRouter's chat-completions API directly from the worker (OpenAI
   // format). OpenRouter permits browser-origin calls, so no special CORS header
   // is needed. Returns { ok, verdict } or { ok:false, error } to fail open.
-  async function judge({ apiKey, model, workContext, goal, video, trail }) {
+  async function judge({ url, apiKey, model, workContext, goal, video, trail }) {
     if (!apiKey) return { ok: false, error: 'no_api_key' };
+    const endpoint = url || GK.OPENROUTER_URL;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), GK.JUDGE_TIMEOUT_MS);
 
     try {
-      const res = await fetch(GK.OPENROUTER_URL, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         signal: controller.signal,
-        headers: {
-          'content-type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-          'X-Title': GK.APP_TITLE, // optional: OpenRouter app ranking
-        },
+        headers: apiHeaders(endpoint, apiKey),
         body: JSON.stringify({
           model: model || GK.MODEL,
           max_tokens: 100,
@@ -176,21 +181,18 @@
     };
   }
 
-  async function validateGoal({ apiKey, model, workContext, goal }) {
+  async function validateGoal({ url, apiKey, model, workContext, goal }) {
     if (!apiKey) {
       return { ok: true, approved: true, reason: 'No API key set — goal not checked against work context.' };
     }
+    const endpoint = url || GK.OPENROUTER_URL;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), GK.JUDGE_TIMEOUT_MS);
     try {
-      const res = await fetch(GK.OPENROUTER_URL, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         signal: controller.signal,
-        headers: {
-          'content-type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-          'X-Title': GK.APP_TITLE,
-        },
+        headers: apiHeaders(endpoint, apiKey),
         body: JSON.stringify({
           model: model || GK.MODEL,
           max_tokens: 120,
